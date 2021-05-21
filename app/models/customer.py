@@ -14,7 +14,6 @@ class Customer(db.Model):
     videos_checked_out_count = db.Column(db.Integer, default=0)
     rentals = db.relationship('Rental', backref='rentals', lazy=True)
     
-
     def to_json(self):
         return {
             "id": self.id,

@@ -13,16 +13,20 @@ rentals_bp = Blueprint("rentals", __name__, url_prefix="/rentals")
 def invalid_video_data(video_json):
     return "title" not in video_json or  \
         "release_date" not in video_json or \
-        "total_inventory" not in video_json
+        "total_inventory" not in video_json  
+            
 
 def invalid_customer_data(customer_json):
     return "name" not in customer_json or  \
         "postal_code" not in customer_json or \
         "phone" not in customer_json
 
-def invalid_rental_data(customer_json):
-    return "customer_id" not in customer_json or  \
-        "video_id" not in customer_json
+def invalid_rental_data(rental_json):
+    return "customer_id" not in rental_json or  \
+        "video_id" not in rental_json or \
+        not str(rental_json["video_id"]).isnumeric() or \
+        not str(rental_json["customer_id"]).isnumeric() or \
+        not Rental.query.filter_by(customer_id=rental_json["customer_id"], video_id=rental_json["video_id"])
 
 @videos_bp.route("", methods=["GET"])
 def videos_index():
@@ -228,6 +232,8 @@ def check_in_video():
 @videos_bp.route('<video_id>/rentals', methods=["GET"])
 def get_rentals_for_video(video_id):
     video = Video.get_video_by_id(video_id)
+
+
     if not video:
         return {
             "message": f"Video {id} not found"
@@ -237,7 +243,15 @@ def get_rentals_for_video(video_id):
 
     results = []
     for rental in rentals:
-        results.append(rental.to_json())
+        customer = Customer.query.get_or_404(rental.customer_id)
+        if rental.status:
+            results.append({
+                "due_date": rental.due_date,
+                "name": customer.name,
+                "phone": customer.phone,
+                "postal_code": customer.postal_code,
+                "status": rental.status
+            })
 
     return jsonify(results), 200
 
