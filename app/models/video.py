@@ -19,6 +19,7 @@ class Video(db.Model):
             "title": self.title,
             "release_date": self.release_date,
             "total_inventory": self.total_inventory,
+            "available_inventory": self.available_inventory
         }
 
     def to_json(self):
@@ -26,7 +27,8 @@ class Video(db.Model):
             "id": self.id,
             "title": self.title,
             "release_date": self.release_date,
-            "total_inventory": self.total_inventory,            
+            "total_inventory": self.total_inventory,
+            "available_inventory": self.available_inventory            
         }
 
     @classmethod
